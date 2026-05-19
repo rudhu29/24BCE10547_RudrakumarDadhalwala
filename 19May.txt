@@ -1,0 +1,80 @@
+SELECT first_name, salary 
+FROM Worker 
+WHERE salary >= 100000 AND salary <= 300000;
+
+SELECT first_name, salary 
+FROM Worker 
+WHERE salary < 100000 OR salary > 300000;
+
+SELECT first_name, department 
+FROM Worker 
+WHERE department = 'HR' OR department = 'Account';
+
+SELECT first_name, department 
+FROM Worker 
+WHERE department != 'HR' AND department != 'Account';
+
+SELECT first_name, salary, department 
+FROM Worker 
+WHERE department IN ('HR', 'Account') 
+  AND (salary >= 100000 AND salary <= 300000);
+
+SELECT first_name, salary, department 
+FROM Worker 
+WHERE salary BETWEEN 80000 AND 500000 
+  AND department NOT IN ('HR', 'Admin');
+
+SELECT COUNT(1) AS worker_count FROM Worker;
+
+SELECT SUM(salary) AS total_payout FROM Worker;
+
+SELECT AVG(salary) AS avg_salary FROM Worker;
+
+SELECT MIN(salary) AS min_salary FROM Worker;
+
+SELECT MAX(salary) AS max_salary FROM Worker;
+
+SELECT department, MIN(salary) AS lowest_salary_dept 
+FROM Worker 
+GROUP BY department;
+
+SELECT first_name FROM Worker WHERE first_name LIKE 'M%';
+
+SELECT first_name FROM Worker WHERE first_name LIKE '%a';
+
+SELECT first_name FROM Worker WHERE first_name LIKE '%i%';
+
+SELECT first_name FROM Worker WHERE first_name LIKE '_i%';
+
+SELECT first_name, salary 
+FROM Worker 
+WHERE first_name NOT LIKE '%a%'
+  AND department = 'Admin' 
+  AND salary = (
+      SELECT MIN(salary) 
+      FROM Worker 
+      WHERE first_name NOT LIKE '%a%' 
+        AND department = 'Admin'
+  );
+
+SELECT first_name, salary,
+    CASE 
+        WHEN salary >= 300000 THEN 'High Salary'
+        WHEN salary >= 100000 THEN 'Medium Salary'
+        ELSE 'Low Salary'
+    END AS salary_bracket
+FROM Worker;
+
+SELECT first_name, department, salary,
+    CASE 
+        WHEN department = 'HR' AND salary > 100000 THEN 'Senior HR'
+        WHEN department = 'Admin' AND salary > 100000 THEN 'Senior Admin'
+        ELSE 'Associate'
+    END AS employee_tier
+FROM Worker;
+
+SELECT 
+    SUM(CASE WHEN department = 'Admin' THEN 1 ELSE 0 END) AS admin_total,
+    SUM(CASE WHEN department = 'HR' THEN 1 ELSE 0 END) AS hr_total,
+    SUM(CASE WHEN department = 'Account' THEN 1 ELSE 0 END) AS account_total
+FROM Worker;
