@@ -1,0 +1,131 @@
+Name:Rudrakumar Paraskumar Dadhalwala
+Reg.No:24BCE10547
+
+1. Find all students from the CS department with marks greater than 80.
+QUERY:
+db.students.find({ 
+  dept: "CS", 
+  marks: { $gt: 80 } 
+})
+
+2. Find students whose marks are between 60 and 85 (inclusive) using $gte and $lte.
+QUERY:
+db.students.find({ 
+  marks: { $gte: 60, $lte: 85 } 
+})
+
+3. Find all students who are either from IT or ECE department using $in operator.
+QUERY:
+db.students.find({ 
+  dept: { $in: ["IT", "ECE"] } 
+})
+
+4. Find students NOT in the CS department using $nin and project only name and dept.
+QUERY:
+db.students.find(
+  { dept: { $nin: ["CS"] } }, 
+  { _id: 0, name: 1, dept: 1 } 
+)
+
+5. Find students where the address.city is 'Chennai' using dot notation.
+QUERY:
+db.students.find({ 
+  "address.city": "Chennai" 
+})
+
+6. Find total revenue per category using $group and $sum on a computed field (price × sold).
+QUERY:
+db.products.aggregate([
+  {
+    $group: {
+      _id: "$category",
+      totalRevenue: { 
+        $sum: { $multiply: ["$price", "$sold"] } 
+      }
+    }
+  }
+])
+
+7. Use aggregation to find total number of students and average marks per department.
+QUERY:
+db.students.aggregate([
+  {
+    $group: {
+      _id: "$dept",
+      totalStudents: { $sum: 1 },
+      averageMarks: { $avg: "$marks" }
+    }
+  }
+])
+
+8. Remove the 'scholarship' field from all students using $unset.
+QUERY:
+db.students.updateMany(
+  {}, 
+  { $unset: { scholarship: "" } }
+)
+
+9. Add a new field 'scholarship' with value false to all CS students using $set.
+QUERY:
+db.students.updateMany(
+  { dept: "CS" }, 
+  { $set: { scholarship: false } }
+)
+
+10. Increment marks of student with _id:6 by 10 using $inc.
+QUERY:
+db.students.updateOne(
+  { _id: 6 }, 
+  { $inc: { marks: 10 } }
+)
+
+11. Find the 3rd and 4th highest scoring students using sort, skip, and limit (pagination).
+QUERY:
+db.students.find()
+  .sort({ marks: -1 })
+  .skip(2)
+  .limit(2)
+
+12. Find employees whose salary is greater than 50000 and experience greater than 5.
+QUERY:
+SELECT *
+FROM employees
+WHERE salary > 50000 AND experience > 5;
+
+13. Find employees whose skills array size is greater than 2.
+QUERY:
+SELECT *
+FROM employees
+WHERE CARDINALITY(skills) > 2;
+
+14. Find departments whose average salary is greater than 50000.
+QUERY:
+SELECT department, AVG(salary) AS avg_salary
+FROM employees
+GROUP BY department
+HAVING AVG(salary) > 50000;
+
+15. Find minimum salary in each department.
+QUERY:
+SELECT department, MIN(salary) AS min_salary
+FROM employees
+GROUP BY department;
+
+16. Rename field city to location.
+QUERY:
+ALTER TABLE employees 
+RENAME COLUMN city TO location;	
+
+17. Find products where stock is of type Number using $type operator.
+QUERY:
+db.products.find({
+  stock: { $type: "number" }
+})
+
+18. Set the active status to true for all inactive students using updateMany and $set.
+QUERY:
+db.students.updateMany(
+  { active: false }, 
+  { $set: { active: true } }
+)
+
