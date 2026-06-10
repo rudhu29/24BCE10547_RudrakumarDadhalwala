@@ -1,0 +1,107 @@
+:: Create Directories
+mkdir C:\data\configDB
+mkdir C:\data\regionA
+mkdir C:\data\regionB
+
+:: =========================
+:: CONFIG SERVER
+:: =========================
+"C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe" --configsvr --replSet centralConfigSet --dbpath C:\data\configDB --port 27119
+
+:: Open a new terminal and connect
+mongosh --port 27119
+
+:: Run:
+rs.initiate({
+  _id: "centralConfigSet",
+  configsvr: true,
+  members: [
+    {
+      _id: 0,
+      host: "localhost:27119"
+    }
+  ]
+})
+
+:: =========================
+:: SHARD A
+:: =========================
+"C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe" --shardsvr --replSet regionASet --dbpath C:\data\regionA --port 27111
+
+:: Open a new terminal and connect
+mongosh --port 27111
+
+:: Run:
+rs.initiate({
+  _id: "regionASet",
+  members: [
+    {
+      _id: 0,
+      host: "localhost:27111"
+    }
+  ]
+})
+
+:: =========================
+:: SHARD B
+:: =========================
+"C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe" --shardsvr --replSet regionBSet --dbpath C:\data\regionB --port 27112
+
+:: Open a new terminal and connect
+mongosh --port 27112
+
+:: Run:
+rs.initiate({
+  _id: "regionBSet",
+  members: [
+    {
+      _id: 0,
+      host: "localhost:27112"
+    }
+  ]
+})
+
+:: =========================
+:: MONGOS ROUTER
+:: =========================
+"C:\Program Files\MongoDB\Server\8.3\bin\mongos.exe" --configdb centralConfigSet/localhost:27119 --port 27117
+
+:: Open another terminal
+mongosh --port 27117
+
+:: =========================
+:: ADD SHARDS
+:: =========================
+sh.addShard("regionASet/localhost:27111")
+sh.addShard("regionBSet/localhost:27112")
+
+:: =========================
+:: ENABLE SHARDING
+:: =========================
+sh.enableSharding("RetailDB")
+
+sh.shardCollection(
+  "RetailDB.sales",
+  { product_id: "hashed" }
+)
+
+:: =========================
+:: INSERT DATA
+:: =========================
+use RetailDB
+
+for(let i=0;i<1000;i++){
+    db.sales.insertOne({
+        product_id: "prod_" + i,
+        price: Math.random() * 500
+    })
+}
+
+:: =========================
+:: VERIFY SHARDING
+:: =========================
+sh.status()
+
+db.sales.countDocuments()
+
+db.sales.find().limit(5)
